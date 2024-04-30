@@ -43,12 +43,24 @@ Parameters included in the saved netCDF include:
 2. Parsivel spectrum (32x32 matrix)
    - coordinates: time, velocity, diameter
 
-
-
 ## ParsivelPSDBUF_FittingPowerLaws_30mins
 
-This perhaps is the more exciting part of the process because we're fitting power law relationships to the PSDs to get terminal velocity relationships and mass-dimension relaitonships unique to our dataset.
+This perhaps is the more exciting part of the process because we're fitting power law relationships to the PSDs to get terminal velocity relationships and mass-dimension relationships unique to our dataset. Very briefly, one of the benefits of SCAMP is that we can use multiple instruments to retrieve microphysical information about the snow particles. One way is using the gauge data to derive m-D relationships for our dataset (m-D relationships are typically in the form of a power law, so we can use gauge data to back out a value for 'a' at each time step). This function accomplishes this task through the following workflow:
 
-1. Ingests the ND file for a date in addition to the gauge and wx sensor dataset.
-2. Locates the times in the gauge and wx sensor dataset that correspond to the date of the PSDs.
-3. For each time step,  
+1. Ingests the previously outputted netCDF file (as dataset) for a date in addition to the gauge and wx sensor dataset.
+2. Locates the times in the gauge and wx sensor dataset that correspond to the date of the netCDF PSD.
+3. For each time step, a power law relationship between Vt and D is found using scipy curvefit.
+  - this power law is then applied to calculate Vt for each D at each time steps
+5. A rolling mean over a 30min window is applied to the gauge data subsetted by indices found in step 2.
+6. Back out 'a' using using the gauge precipitation rate, N(D), dD, Vt found in step 3, and D^2 (assuming b = 2)
+7. Add the newly found power law relationships to the xarray dataset and save as a netCDF file
+
+Parameters included in the saved netCDF include:
+1. N(D) (aka dsd in the script)
+   - coordinates: time, diameter
+2. Parsivel spectrum (32x32 matrix)
+   - coordinates: time, velocity, diameter
+3. calculated terminal velocities
+- coordinates: time, diameter
+4. 'a' coefficient in m-D relationship
+- coordinates: time (one a per PSD)
