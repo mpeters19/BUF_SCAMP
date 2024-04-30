@@ -37,11 +37,11 @@ The purpose of this script is to calculate N(D) using the methods presented in T
 4. creates a new dictionary
 5. Converts dictionary to a dataset and saves as a netCDF file (1 per date)
 
-Parameters included in the saved netCDF include
+Parameters included in the saved netCDF include:
 1. N(D) (aka dsd in the script)
-   - coordinates: time, diameter 
-3. Parsivel Spectrum (the 32x32 matrix)
-   - 
+   - coordinates: time, diameter
+2. Parsivel spectrum (32x32 matrix)
+   - coordinates: time, velocity, diameter
 
 
 
