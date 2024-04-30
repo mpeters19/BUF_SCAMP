@@ -17,11 +17,15 @@ Notes:
 
 ## Preprocessing using PyDSD
 
-As data files get written, they automatically get processed using the PyDSD repository. While that repo offers a plethora of 
-parameter calculations, it is primarily used to aggregate the raw hourly netCDFs into one daily netCDF and for it's matrix filtering 
-capabilities.
+As data files get written, they automatically get processed using the PyDSD repository, particularly using [PyDSD/pydsd/io/ParsivelReader.py](https://github.com/josephhardinee/PyDSD/blob/master/pydsd/io/ParsivelReader.py). The overall function of this script is to...
 
-Once I do a deeper dive, I will update this part.
+1. read raw 10s parsivel files,
+2. convert the time to an Epoch time
+3. adds parsivel measured/outputted variables to a Python dictionary
+4. Applies a data quality matrix from Ali Tokay
+
+This outputted dictionary then gets converted to an xarray dataset externally (not using PyDSD) and saved to a local directory as one netCDF file (we go from 5760 10s files to one 24 hr file, which makes it way easier to handle going forward).
+
 
 ## ParsivelPSDBUF_ND
 
