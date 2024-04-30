@@ -25,7 +25,7 @@ As data files get written, they automatically get processed using the PyDSD repo
 
 Each outputted dictionary then gets converted to an xarray dataset externally (not using PyDSD) and saved to a local directory as a netCDF file.
 
-The rest of the processing flow is an adaptation from the repository created by Joe Boomgard-Zagrodnik, a postdoc a WSU, for the OLYMPEX field campaign. Joe provided the foundation I needed to create my own parsivel processing flow, which was necessary considering I knew next to nothing about python when I started grad school.
+The rest of the processing flow is an adaptation from the repository created by Joe Boomgard-Zagrodnik, a postdoc a WSU, for the OLYMPEX field campaign. Joe provided the foundation I needed to create my own parsivel processing flow, which was necessary considering I knew next to nothing about python when I started grad school. 
 
 ## ParsivelPSDBUF_ND
 
@@ -33,9 +33,10 @@ The purpose of this script is to calculate N(D) using the methods presented in T
 
 1. opens and reads the all the netCDF files for a specific date as a xarray dataset
 2. resamples data from an integration time of 10s to 1min (to be consistent with gauge/wx sensor obs)
-3. calculates N(D)
-4. creates a new dictionary
-5. Converts dictionary to a dataset and saves as a netCDF file (1 per date)
+3. Initializes variables
+4. calculates N(D)
+5. creates a new dictionary
+6. Converts dictionary to a dataset and saves as a netCDF file (1 per date)
 
 Parameters included in the saved netCDF include:
 1. N(D) (aka dsd in the script)
@@ -48,8 +49,9 @@ Parameters included in the saved netCDF include:
 This perhaps is the more exciting part of the process because we're fitting power law relationships to the PSDs to get terminal velocity relationships and mass-dimension relationships unique to our dataset. Very briefly, one of the benefits of SCAMP is that we can use multiple instruments to retrieve microphysical information about the snow particles. One way is using the gauge data to derive m-D relationships for our dataset (m-D relationships are typically in the form of a power law, so we can use gauge data to back out a value for 'a' at each time step). This function accomplishes this task through the following workflow:
 
 1. Ingests the previously outputted netCDF file (as dataset) for a date in addition to the gauge and wx sensor dataset.
-2. Locates the times in the gauge and wx sensor dataset that correspond to the date of the netCDF PSD.
-3. For each time step, a power law relationship between Vt and D is found using scipy curvefit.
+2. Initializes variables
+3. Locates the times in the gauge and wx sensor dataset that correspond to the date of the netCDF PSD.
+4. For each time step, a power law relationship between Vt and D is found using scipy curvefit.
   - this power law is then applied to calculate Vt for each D at each time steps
 5. A rolling mean over a 30min window is applied to the gauge data subsetted by indices found in step 2.
 6. Back out 'a' using using the gauge precipitation rate, N(D), dD, Vt found in step 3, and D^2 (assuming b = 2)
@@ -61,6 +63,14 @@ Parameters included in the saved netCDF include:
 2. Parsivel spectrum (32x32 matrix)
    - coordinates: time, velocity, diameter
 3. calculated terminal velocities
-- coordinates: time, diameter
+   - coordinates: time, diameter
 4. 'a' coefficient in m-D relationship
-- coordinates: time (one a per PSD)
+   - coordinates: time (one a per PSD)
+  
+## ParsivelPSDBUF_CCalculations
+
+Remember that long list of parameters from the introductory section of this README? Well this is where all that magic happens! All those parameters are calculated in this script and while I'll briefly go over the calculations here, references and any notes about the calculations are detailed in the script by the code.
+
+Note: tuples are used in this script to allow the user to see contributions from each drop bin range to parameter total values (I swear this will make more sense later) where the contribution from each drop bin range is included as the second element. Parameters that are stored as tuples will be noted below.
+
+1. Initializes variables
