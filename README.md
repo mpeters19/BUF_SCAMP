@@ -1,19 +1,18 @@
 # BUF Parsivel Processing Scripts
 
-ParsivelPSDBUF takes a ProcessParsivel instance and computes the DSD using the methods from Tokay et al. (2014). 
-This code is based on the get_rainparams.pro code written by Ali Tokay and converted to IDL by Dave Wolff. 
+This repository includes function that handle and process Parsivel data from the UIUC SCAMP Deployment in Buffalo, NY.
 
-The reason for keeping the ParsivelDSD as a separate class is that the user may be interested in seeing 
-characteristics of the DSD that do not appear in the final processed dataset...for instance, the contribution
-to LWC from each Parsivel bin. By using this class, one can branch off from various steps on the processing 
-process and make plots or analyze the data.
+In short, it filters and calculates the DSDs, fits terminal velocity relationships and derives mass-dimension relationships (from the gauge) to the data, and calculates the following parameters using the DSDs and fitted relationships (quick note, each parameter listed is calculated twice, once with the m-D relationships derived from the gauge and again using the warm-topped m-D relationship from Heymsfield et al. 2010):
+1. Ice Water Content
+2. Reflectivity factor using melted equivalent diameter
+3. Equivalent reflectivity factor
+6. Mass-weighted mean diameter 
+7. Liquid Equivalent Normalized Intercept Parameter (Nw)
+8. Precipitation Rate
+9. Effective density
+10. Snow-to-liquid ratios
 
-In some cases, the data is saved as a tuple, with the contribution to rainrate from each drop bin range 
-included as the second element in the tuple. 
-
-Notes:
-  Currently uses the corrected fall velocities from Ali Tokay...changing the assumed fall velocities will 
-  affect the drop parameters. 
+Note: all literature references for each calculation can be found in the Python scripts
 
 ## Preprocessing using PyDSD
 
@@ -22,15 +21,29 @@ As data files get written, they automatically get processed using the PyDSD repo
 1. read raw 10s parsivel files,
 2. convert the time to an Epoch time
 3. adds parsivel measured/outputted variables to a Python dictionary
-4. Applies a data quality matrix from Ali Tokay
+4. Applies a data quality matrix from Ali Tokay to DSD
 
-This outputted dictionary then gets converted to an xarray dataset externally (not using PyDSD) and saved to a local directory as one netCDF file (we go from 5760 10s files to one 24 hr file, which makes it way easier to handle going forward).
+Each outputted dictionary then gets converted to an xarray dataset externally (not using PyDSD) and saved to a local directory as a netCDF file.
 
+The rest of the processing flow is an adaptation from the repository created by Joe Boomgard-Zagrodnik, a postdoc a WSU, for the OLYMPEX field campaign. Joe provided the foundation I needed to create my own parsivel processing flow, which was necessary considering I knew next to nothing about python when I started grad school.
 
 ## ParsivelPSDBUF_ND
 
-After using PyDSD, 
-The general flow is that Reads in daily Parsivel netCDFs and calculates n(D) using 
+The purpose of this script is to calculate N(D) using the methods presented in Tokay et al. 2014 and change the integration time. 
+
+1. opens and reads the all the netCDF files for a specific date as a xarray dataset
+2. resamples data from an integration time of 10s to 1min (to be consistent with gauge/wx sensor obs)
+3. calculates N(D)
+4. creates a new dictionary
+5. Converts dictionary to a dataset and saves as a netCDF file (1 per date)
+
+Parameters included in the saved netCDF include
+1. N(D) (aka dsd in the script)
+   - coordinates: time, diameter 
+3. Parsivel Spectrum (the 32x32 matrix)
+   - 
+
+
 
 ## ParsivelPSDBUF_FittingPowerLaws_30mins
 
