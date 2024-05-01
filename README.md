@@ -53,7 +53,7 @@ This perhaps is the more exciting part of the process because we're fitting powe
 2. Initializes variables
 3. Locates the times in the gauge and wx sensor dataset that correspond to the date of the netCDF PSD.
 4. For each time step, a power law relationship between Vt and D is found using scipy curvefit.
-  - this power law is then applied to calculate Vt for each D at each time steps
+   - this power law is then applied to calculate Vt for each D at each time steps
 5. A rolling mean over a 30min window is applied to the gauge data subsetted by indices found in step 2.
 6. Back out 'a' using using the gauge precipitation rate, N(D), dD, Vt found in step 3, and D^2 (assuming b = 2)
 7. Add the newly found power law relationships to the xarray dataset and save as a netCDF file
@@ -78,26 +78,26 @@ Note: tuples are used in this script to allow the user to see contributions from
 2. Calculates particle mass, melted equivalent diameter, and the mass of the particles using the melted equivalent diameter (done for both the gauge derived m-D relationship anf the warm-topped m-D relationship from Heymsfield et al. 2010
 3. Calculates PSD parameters (will be detailed below)
 4. Add the newly calculated parameters to the xarray dataset and save as a netCDF file
-  - all parameters listed above in the intro section are calculated in this script, but not all are saved/outputted (the only thing that isn't added to the dataset is Z)
+   - all parameters listed above in the intro section are calculated in this script, but not all are saved/outputted (the only thing that isn't added to the dataset is Z)
 6. Removes the .nc file from the second script
 
 Parameters included in the netCDF include:
 1. Mean particle velocity
-- coordinates: time
+   - coordinates: time
 3. Equivalent reflectivity factor
-- coordinates: time
+   - coordinates: time
 4. Mass-weighted mean diameter
-- coordinates: time
+   - coordinates: time
 5. Liquid Equivalent Normalized Intercept Parameter (Nw)
-- coordinates: time
+   - coordinates: time
 6. Ice Water Content
-- coordinates: time
+   - coordinates: time
 7. Precipitation Rate
-- coordinates: time
+   - coordinates: time
 8. Effective density
-- coordinates: time
+   - coordinates: time
 9. Snow-to-liquid ratios
-- coordinates: time
+   - coordinates: time
 
 Note: each parameter listed (EXCEPT mean velocity) above is calculated twice, once with the m-D relationships derived from the gauge and again using the warm-topped m-D relationship from Heymsfield et al. 2010). 
 Note #2: Both IWC and precip rate are initialized as tuples, where the first element represents the total at each time step, but the second element breaks the first one up into the diameter bins. Only the first element is outputted in the netCDF.
