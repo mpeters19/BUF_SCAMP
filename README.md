@@ -3,14 +3,15 @@
 This repository includes function that handle and process Parsivel data from the UIUC SCAMP Deployment in Buffalo, NY.
 
 In short, it filters and calculates the DSDs, fits terminal velocity relationships and derives mass-dimension relationships (from the gauge) to the data, and calculates the following parameters using the DSDs and fitted relationships (quick note, each parameter listed is calculated twice, once with the m-D relationships derived from the gauge and again using the warm-topped m-D relationship from Heymsfield et al. 2010):
-1. Ice Water Content
+1. Mean particle velocity
 2. Reflectivity factor using melted equivalent diameter
 3. Equivalent reflectivity factor
-6. Mass-weighted mean diameter 
-7. Liquid Equivalent Normalized Intercept Parameter (Nw)
-8. Precipitation Rate
-9. Effective density
-10. Snow-to-liquid ratios
+4. Mass-weighted mean diameter
+5. Liquid Equivalent Normalized Intercept Parameter (Nw)
+6. Ice Water Content
+7. Precipitation Rate
+8. Effective density
+9. Snow-to-liquid ratios
 
 Note: all literature references for each calculation can be found in the Python scripts
 
@@ -74,3 +75,29 @@ Remember that long list of parameters from the introductory section of this READ
 Note: tuples are used in this script to allow the user to see contributions from each drop bin range to parameter total values (I swear this will make more sense later) where the contribution from each drop bin range is included as the second element. Parameters that are stored as tuples will be noted below.
 
 1. Initializes variables
+2. Calculates particle mass, melted equivalent diameter, and the mass of the particles using the melted equivalent diameter (done for both the gauge derived m-D relationship anf the warm-topped m-D relationship from Heymsfield et al. 2010
+3. Calculates PSD parameters (will be detailed below)
+4. Add the newly calculated parameters to the xarray dataset and save as a netCDF file
+  - all parameters listed above in the intro section are calculated in this script, but not all are saved/outputted (the only thing that isn't added to the dataset is Z)
+6. Removes the .nc file from the second script
+
+Parameters included in the netCDF include:
+1. Mean particle velocity
+- coordinates: time
+3. Equivalent reflectivity factor
+- coordinates: time
+4. Mass-weighted mean diameter
+- coordinates: time
+5. Liquid Equivalent Normalized Intercept Parameter (Nw)
+- coordinates: time
+6. Ice Water Content
+- coordinates: time
+7. Precipitation Rate
+- coordinates: time
+8. Effective density
+- coordinates: time
+9. Snow-to-liquid ratios
+- coordinates: time
+
+Note: each parameter listed (EXCEPT mean velocity) above is calculated twice, once with the m-D relationships derived from the gauge and again using the warm-topped m-D relationship from Heymsfield et al. 2010). 
+Note #2: Both IWC and precip rate are initialized as tuples, where the first element represents the total at each time step, but the second element breaks the first one up into the diameter bins. Only the first element is outputted in the netCDF.
