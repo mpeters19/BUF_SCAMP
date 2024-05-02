@@ -17,12 +17,11 @@ Note: all literature references for each calculation can be found in the Python 
 
 ## Preprocessing using PyDSD
 
-As data files get written, they automatically get processed using the PyDSD repository, particularly using [PyDSD/pydsd/io/ParsivelReader.py](https://github.com/josephhardinee/PyDSD/blob/master/pydsd/io/ParsivelReader.py). The overall function of this script is to...
+As data files get written, they automatically get minorly processed using the PyDSD repository, particularly using [PyDSD/pydsd/io/ParsivelReader.py](https://github.com/josephhardinee/PyDSD/blob/master/pydsd/io/ParsivelReader.py). The overall function of this script is to...
 
-1. read raw 10s parsivel files,
-2. convert the time to an Epoch time
-3. adds parsivel measured/outputted variables to a Python dictionary
-4. Applies a data quality matrix from Ali Tokay to DSD
+1. Read raw 10s parsivel files
+2. Convert the time to an Epoch time
+3. Add parsivel measured/outputted variables to a Python dictionary
 
 Each outputted dictionary then gets converted to an xarray dataset externally (not using PyDSD) and saved to a local directory as a netCDF file.
 
@@ -32,12 +31,13 @@ The rest of the processing flow is an adaptation from the repository created by 
 
 The purpose of this script is to calculate N(D) using the methods presented in Tokay et al. 2014 and change the integration time. 
 
-1. opens and reads the all the netCDF files for a specific date as a xarray dataset
-2. resamples data from an integration time of 10s to 1min (to be consistent with gauge/wx sensor obs)
+1. Opens and read the all the netCDF files for a specific date as a xarray dataset
+2. Resamples data from an integration time of 10s to 1min (to be consistent with gauge/wx sensor obs)
 3. Initializes variables
 4. calculates N(D)
-5. creates a new dictionary
-6. Converts dictionary to a dataset and saves as a netCDF file (1 per date)
+5. Applies a data quality matrix from Ali Tokay to parsivel matrix
+6. creates a new dictionary
+7. Converts dictionary to a dataset and saves as a netCDF file (1 per date)
 
 Parameters included in the saved netCDF include:
 1. N(D) (aka dsd in the script)
