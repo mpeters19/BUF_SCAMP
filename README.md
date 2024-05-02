@@ -23,7 +23,7 @@ As data files get written, they automatically get minorly processed using the Py
 2. Convert the time to an Epoch time
 3. Add parsivel measured/outputted variables to a Python dictionary
 
-Each outputted dictionary then gets converted to an xarray dataset externally (not using PyDSD) and saved to a local directory as a netCDF file.
+Each outputted dictionary then gets converted to an xarray dataset externally (not using PyDSD) and saved to a local directory as an hourly netCDF file.
 
 The rest of the processing flow is an adaptation from the repository created by Joe Boomgard-Zagrodnik, a postdoc a WSU, for the OLYMPEX field campaign. Joe provided the foundation I needed to create my own parsivel processing flow, which was necessary considering I knew next to nothing about python when I started grad school. 
 
