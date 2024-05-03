@@ -1,8 +1,8 @@
 # BUF Parsivel Processing Scripts
 
-This repository includes function that handle and process Parsivel data from the UIUC SCAMP Deployment in Buffalo, NY.
+This repository includes functions that handle and process Parsivel data from the UIUC SCAMP Deployment in Buffalo, NY.
 
-In short, it filters and calculates the DSDs, fits terminal velocity relationships and derives mass-dimension relationships (from the gauge) to the data, and calculates the following parameters using the DSDs and fitted relationships (quick note, each parameter listed is calculated twice, once with the m-D relationships derived from the gauge and again using the warm-topped m-D relationship from Heymsfield et al. 2010):
+In short, it filters and calculates the DSDs, fits terminal velocity relationships and derives mass-dimension relationships (from the gauge) for the data, and calculates the following parameters using the DSDs and fitted relationships (quick note, each parameter listed is calculated twice, once with the m-D relationships derived from the gauge and again using the warm-topped m-D relationship from Heymsfield et al. 2010):
 1. Mean particle velocity
 2. Reflectivity factor using melted equivalent diameter
 3. Equivalent reflectivity factor
@@ -13,7 +13,7 @@ In short, it filters and calculates the DSDs, fits terminal velocity relationshi
 8. Effective density
 9. Snow-to-liquid ratios
 
-Note: all literature references for each calculation can be found in the Python scripts
+Note: all literature references for each calculation can be found in the Python scripts and I run the scripts using the Jupyter Notebook provided.
 
 ## Preprocessing using PyDSD
 
