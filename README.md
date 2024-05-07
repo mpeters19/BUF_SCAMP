@@ -7,9 +7,9 @@ In short, it filters and calculates the DSDs, fits terminal velocity relationshi
 2. Reflectivity factor using melted equivalent diameter
 3. Equivalent reflectivity factor
 4. Mass-weighted mean diameter
-5. Liquid Equivalent Normalized Intercept Parameter (Nw)
-6. Ice Water Content
-7. Precipitation Rate
+5. Liquid equivalent normalized intercept parameter (Nw)
+6. Ice water content
+7. Precipitation rate
 8. Effective density
 9. Snow-to-liquid ratios
 
@@ -25,11 +25,11 @@ As data files get written, they automatically get minorly processed using the Py
 
 Each outputted dictionary then gets converted to an xarray dataset externally (not using PyDSD) and saved to a local directory as an hourly netCDF file.
 
-The rest of the processing flow is an adaptation from the repository created by Joe Boomgard-Zagrodnik, a postdoc at WSU, for the OLYMPEX field campaign. Joe provided the foundation I needed to create my own parsivel processing flow, which was necessary considering I knew next to nothing about Python when I started grad school. 
+The rest of the processing flow is an adaptation from the repository created by Joe Boomgard-Zagrodnik, a postdoc at WSU, for the OLYMPEX field campaign. 
 
 ## ParsivelPSDBUF_ND
 
-The purpose of this script is to calculate N(D) using the methods presented in Tokay et al. 2014 and change the integration time. 
+The purpose of this script is to calculate N(D) (aka the DSD/PSD) using the methods presented in Tokay et al. 2014, and change the integration time. 
 
 1. Opens and read the all the netCDF files for a specific date as a xarray dataset
 2. Resamples data from an integration time of 10s to 1min (to be consistent with gauge/wx sensor obs)
@@ -67,11 +67,11 @@ Parameters included in the saved netCDF include:
 4. 'a' coefficient in m-D relationship
    - coordinates: time (one a per PSD)
   
-## ParsivelPSDBUF_CCalculations
+## ParsivelPSDBUF_Calculations
 
 Remember that long list of parameters from the introductory section of this README? Well this is where all that magic happens! All those parameters are calculated in this script and while I'll briefly go over the calculations here, references and any notes about the calculations are detailed in the script by the code.
 
-Note: tuples are used in this script to allow the user to see contributions from each drop bin range to parameter total values where the contribution from each drop bin range is included as the second element. Parameters that are stored as tuples will be noted below.
+Note: tuples are used in this script to allow the user to see contributions from each drop bin range to parameter total values where the contribution from each drop bin range is included as the second element. Parameters that are stored as tuples will be noted below and only the first element is outputted in the netCDF.
 
 Workflow:
 1. Initializes variables
@@ -92,12 +92,13 @@ Parameters included in the netCDF include:
    - coordinates: time
 6. Ice water content
    - coordinates: time
+   - initialized as tuple
 7. Precipitation rate
    - coordinates: time
+   - initialized as tuple
 8. Effective density
    - coordinates: time
 9. Snow-to-liquid ratios
    - coordinates: time
 
 Note: each parameter listed (EXCEPT mean velocity) above is calculated twice, once with the m-D relationships derived from the gauge and again using the warm-topped m-D relationship from Heymsfield et al. 2010). 
-Note #2: Both IWC and precip rate are initialized as tuples, where the first element represents the total at each time step, but the second element breaks the first one up into the diameter bins. Only the first element is outputted in the netCDF.
