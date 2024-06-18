@@ -61,33 +61,55 @@ class ParsivelPSDBUF(object):
         
         for td in list(range(0,len(self.ds.time))):
             print(td)
-           
-            snow_dia_vel = []
 
-            for i in range(0, len(self.drop_diameter)):
-                local_dia = self.drop_diameter[i]
-                for j in range(0, len(self.v_parsivel)):
-                    local_veloc = self.v_parsivel[j]
-                    count = self.ds.spectrum[td, i, j]
-                    try:
-                        for _ in range(int(count)):
-                            snow_dia_vel.append((local_dia, local_veloc))
-                    except ValueError:
-                        snow_dia_vel = []
-                        
-            snow_triple_time_dia_vel = np.array(snow_dia_vel)
+            # Example data
+            # velocity: 32, diameter: 32, data: 2D matrix of counts
+            velocity_bins = self.v_parsivel  # Example velocity bins
+            diameter_bins = self.drop_diameter  # Example diameter bins
+            counts_matrix = self.ds.spectrum[td].values # Example counts matrix
 
-            if len(snow_triple_time_dia_vel) == 0:
-                current_vt = np.zeros(32)
-                self.Vt_parameters[td,0] = 0
-                self.Vt_parameters[td,1] = 0
+            # Prepare the data for fitting
+            velocities, diameters = np.meshgrid(velocity_bins, diameter_bins, indexing='ij')
+            velocities_flat = velocities.flatten()
+            diameters_flat = diameters.flatten()
+            counts_flat = counts_matrix.flatten()
+
+            # Filter out zero counts
+            mask = counts_flat > 0
+            filtered_velocities = velocities_flat[mask]
+            filtered_diameters = diameters_flat[mask]
+            filtered_counts = counts_flat[mask]
+
+            # Prepare the data for curve fitting
+            xdata = filtered_diameters / 1000  # Convert to meters if needed
+            ydata = filtered_velocities
+
+            if ydata.size == 0:
+                a, b = 0, 0
             else:
-                snow_pars, snow_cov = curve_fit(f=power_law, xdata=snow_triple_time_dia_vel[:,0]/1000, ydata=snow_triple_time_dia_vel[:,1], p0=[0.006, 0.05], bounds=(0, [np.inf, 1]), check_finite=False)
-                current_vt = (snow_pars[0])*np.power(np.array(self.drop_diameter)/1000, snow_pars[1])
-                self.Vt_parameters[td,0] = snow_pars[0]
-                self.Vt_parameters[td,1] = snow_pars[1]
+                # Fit the power law
+                popt, pcov = curve_fit(power_law, xdata, ydata, p0=[0.006, 0.05], bounds=(0, [np.inf, 1]), check_finite=False)
+                # Extract fitted parameters
+                a, b = popt
 
-            self.terminal_velocities[td,:] = current_vt
+            # Calculate fitted velocities for the original diameter bins
+            fitted_velocities = power_law(np.array(diameter_bins) / 1000, a, b)
+            self.terminal_velocities[td,:] = fitted_velocities
+           
+            self.Vt_parameters[td,0] = a
+            self.Vt_parameters[td,1] = b
+
+            # Calculate weighted sum and mean terminal velocity
+            spectrum_sum = np.sum(self.ds.spectrum[td, :, :])
+            weighted_sum = np.sum(fitted_velocities * np.sum(self.ds.spectrum[td, :, :], axis=0), axis=0)
+            mean_terminal_velocity = np.where(spectrum_sum != 0, weighted_sum / spectrum_sum, 0)
+            self.mean_fitted_vt[td] = mean_terminal_velocity
+
+            spectrum_sum = np.sum(np.sum(self.ds.spectrum[td, :, :], axis=1))
+            if spectrum_sum != 0:
+                self.mean_measured_v[td] = np.sum(np.sum(self.ds.spectrum[td, :, :], axis=1) * self.v_parsivel) / spectrum_sum
+            else:
+                self.mean_measured_v[td] = 0
         
         print('Calulating a')
         gauge_preciprate_oneminute = gauge_and_wx_station_data.Processed_precip_rate_mmhr[common_indices_ds2[0]:(common_indices_ds2[-1]+1)]
@@ -106,12 +128,14 @@ class ParsivelPSDBUF(object):
     def saveDSD_as_nc(self,ds,date):
         
         print('Saving netCDF file for '+date+'...')
-        ds["terminal_velocities"] = (["time", "diameter"], self.terminal_velocities.data)
-        #ds["Vt_coefficient"] = (["time"], self.Vt_parameters[0].data)
-        #ds["Vt_exponent"] = (["time"], self.Vt_parameters[1].data)
-        ds["m_D_coefficient"] = (["time"], self.m_D_coefficient.data)
+        ds["terminal_velocities"] = (["time", "diameter"], self.terminal_velocities)
+        ds["Vt_coefficient"] = (["time"], self.Vt_parameters[:, 0])
+        ds["Vt_exponent"] = (["time"], self.Vt_parameters[:, 1])
+        ds["m_D_coefficient"] = (["time"], self.m_D_coefficient)
+        ds["mean_fitted_vt"] = (["time"], self.mean_fitted_vt)
+        ds["mean_measured_v"] = (["time"], self.mean_measured_v)
         
-        ds.to_netcdf('/data/accp/a/mp46/Parsivel_data/' + date + '_Vt_mD_BUF.nc')  # saving netCDF to specified path
+        ds.to_netcdf('/data/accp/a/mp46/Parsivel_data/' + date + '_Vt_mD_BUF30min_overhaul.nc')  # saving netCDF to specified path
         print("NetCDF file saved successfully.")
 
     drop_diameter = [
